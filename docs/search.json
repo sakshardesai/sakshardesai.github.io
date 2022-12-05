@@ -28,17 +28,45 @@
     "text": "About this blog"
   },
   {
-    "objectID": "Untitled.html",
-    "href": "Untitled.html",
-    "title": "Untitled",
+    "objectID": "Project.html",
+    "href": "Project.html",
+    "title": "Project",
     "section": "",
-    "text": "Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see https://quarto.org."
+    "text": "I have used a dataset called Salary Data available on Kaggle. The data contains two variables: (1) Years of experience of employees (x); (2) Salary (y). The aim is to predict Salary using Linear Models.\n\nlibrary(skimr)\nlibrary(caTools)\ndata <- read.csv('/Users/sakshardesai/Downloads/Salary_Data.csv')\nskim(data)\n\n\nData summary\n\n\nName\ndata\n\n\nNumber of rows\n30\n\n\nNumber of columns\n2\n\n\n_______________________\n\n\n\nColumn type frequency:\n\n\n\nnumeric\n2\n\n\n________________________\n\n\n\nGroup variables\nNone\n\n\n\nVariable type: numeric\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nskim_variable\nn_missing\ncomplete_rate\nmean\nsd\np0\np25\np50\np75\np100\nhist\n\n\n\n\nYearsExperience\n0\n1\n5.31\n2.84\n1.1\n3.20\n4.7\n7.7\n10.5\n▅▇▅▃▅\n\n\nSalary\n0\n1\n76003.00\n27414.43\n37731.0\n56720.75\n65237.0\n100544.8\n122391.0\n▅▇▂▃▅"
   },
   {
-    "objectID": "Untitled.html#running-code",
-    "href": "Untitled.html#running-code",
-    "title": "Untitled",
-    "section": "Running Code",
-    "text": "Running Code\nWhen you click the Render button a document will be generated that includes both content and the output of embedded code. You can embed code like this:\n\n1 + 1\n\n[1] 2\n\n\nYou can add options to executable code like this\n\n\n[1] 4\n\n\nThe echo: false option disables the printing of code (only output is displayed)."
+    "objectID": "Project.html#data-visualization",
+    "href": "Project.html#data-visualization",
+    "title": "Project",
+    "section": "Data Visualization",
+    "text": "Data Visualization\n\nx <- data$YearsExperience\ny <- data$Salary\nplot(x,y)"
+  },
+  {
+    "objectID": "Project.html#simple-linear-regression",
+    "href": "Project.html#simple-linear-regression",
+    "title": "Project",
+    "section": "Simple Linear Regression",
+    "text": "Simple Linear Regression\n\nsample <- sample.split(data$YearsExperience, SplitRatio = 0.7)\ntrain  <- subset(data, sample == TRUE)\ntest   <- subset(data, sample == FALSE)\nx_train <- train$YearsExperience\nx_test <- test$YearsExperience\ny_train <- train$Salary\ny_test <- test$Salary\nx_new <- (x_train-mean(x_train))/sd(x_train)\ny_new <- (y_train-mean(y_train))/sd(y_train)\nslr <- lm(y_new~x_new)\nsummary(slr)\n\n\nCall:\nlm(formula = y_new ~ x_new)\n\nResiduals:\n     Min       1Q   Median       3Q      Max \n-0.26827 -0.13314 -0.02971  0.07717  0.42409 \n\nCoefficients:\n              Estimate Std. Error t value Pr(>|t|)    \n(Intercept) -1.813e-18  4.310e-02    0.00        1    \nx_new        9.813e-01  4.417e-02   22.22 4.67e-15 ***\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 0.1975 on 19 degrees of freedom\nMultiple R-squared:  0.9629,    Adjusted R-squared:  0.961 \nF-statistic: 493.6 on 1 and 19 DF,  p-value: 4.674e-15\n\nplot(x_new,y_new)\nabline(slr)"
+  },
+  {
+    "objectID": "Project.html#quadratic-regression",
+    "href": "Project.html#quadratic-regression",
+    "title": "Project",
+    "section": "Quadratic Regression",
+    "text": "Quadratic Regression\n\nx2 <- x_train^2\nx2_new <- (x2-mean(x2))/sd(x2)\nqr <- lm(y_new~x_new+x2_new)\nsummary(qr)\n\n\nCall:\nlm(formula = y_new ~ x_new + x2_new)\n\nResiduals:\n     Min       1Q   Median       3Q      Max \n-0.28389 -0.14802 -0.01643  0.07747  0.40707 \n\nCoefficients:\n              Estimate Std. Error t value Pr(>|t|)    \n(Intercept)  1.311e-17  4.416e-02   0.000 1.000000    \nx_new        1.049e+00  2.154e-01   4.869 0.000123 ***\nx2_new      -6.912e-02  2.154e-01  -0.321 0.752009    \n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 0.2024 on 18 degrees of freedom\nMultiple R-squared:  0.9631,    Adjusted R-squared:  0.959 \nF-statistic: 235.2 on 2 and 18 DF,  p-value: 1.255e-13"
+  },
+  {
+    "objectID": "Project.html#prediction",
+    "href": "Project.html#prediction",
+    "title": "Project",
+    "section": "Prediction",
+    "text": "Prediction\n\nx2_test <- x_test^2\nx_test <- (x_test-mean(x_test))/sd(x_test)\nx2_test <- (x2_test-mean(x2_test))/sd(x2_test)\ny_test <- (y_test-mean(y_test))/sd(y_test)\npred_slr <- predict(slr,newdata = data.frame(x_new = x_test))\npred_qr <- predict(qr,newdata = data.frame(x_new=x_test,x2_new=x2_test))\nmean((pred_slr-y_test)^2)\n\n[1] 0.05240304\n\nmean((pred_qr-y_test)^2)\n\n[1] 0.05448814"
+  },
+  {
+    "objectID": "Project.html#discussion",
+    "href": "Project.html#discussion",
+    "title": "Project",
+    "section": "Discussion",
+    "text": "Discussion\nThe simple linear regression model shows slightly better prediction accuracy than the quadratic regression model. Moreover, the quadratic coefficient is not significant as seen from the summary table of quadratic model."
   }
 ]

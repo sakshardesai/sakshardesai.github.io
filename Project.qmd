@@ -1,0 +1,68 @@
+---
+title: "Project"
+format: html
+editor: visual
+---
+
+## Data Description
+
+I have used a dataset called Salary Data available on Kaggle. The data contains two variables: (1) Years of experience of employees (x); (2) Salary (y). The aim is to predict Salary using Linear Models.
+
+```{r}
+library(skimr)
+library(caTools)
+data <- read.csv('/Users/sakshardesai/Downloads/Salary_Data.csv')
+skim(data)
+```
+
+## Data Visualization
+
+```{r}
+x <- data$YearsExperience
+y <- data$Salary
+plot(x,y)
+```
+
+## Simple Linear Regression
+
+```{r}
+sample <- sample.split(data$YearsExperience, SplitRatio = 0.7)
+train  <- subset(data, sample == TRUE)
+test   <- subset(data, sample == FALSE)
+x_train <- train$YearsExperience
+x_test <- test$YearsExperience
+y_train <- train$Salary
+y_test <- test$Salary
+x_new <- (x_train-mean(x_train))/sd(x_train)
+y_new <- (y_train-mean(y_train))/sd(y_train)
+slr <- lm(y_new~x_new)
+summary(slr)
+plot(x_new,y_new)
+abline(slr)
+```
+
+## Quadratic Regression
+
+```{r}
+x2 <- x_train^2
+x2_new <- (x2-mean(x2))/sd(x2)
+qr <- lm(y_new~x_new+x2_new)
+summary(qr)
+```
+
+## Prediction
+
+```{r}
+x2_test <- x_test^2
+x_test <- (x_test-mean(x_test))/sd(x_test)
+x2_test <- (x2_test-mean(x2_test))/sd(x2_test)
+y_test <- (y_test-mean(y_test))/sd(y_test)
+pred_slr <- predict(slr,newdata = data.frame(x_new = x_test))
+pred_qr <- predict(qr,newdata = data.frame(x_new=x_test,x2_new=x2_test))
+mean((pred_slr-y_test)^2)
+mean((pred_qr-y_test)^2)
+```
+
+## Discussion
+
+The simple linear regression model shows slightly better prediction accuracy than the quadratic regression model. Moreover, the quadratic coefficient is not significant as seen from the summary table of quadratic model.
